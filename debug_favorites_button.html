@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Favorites Button</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container mt-4">
+        <h1>Debug Favorites Add to Cart Button</h1>
+        
+        <div class="alert alert-info">
+            This page tests the exact button HTML and JavaScript from favorites.php
+        </div>
+        
+        <!-- Test Buttons -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h3>Test Buttons</h3>
+            </div>
+            <div class="card-body">
+                <!-- Exact button from favorites.php -->
+                <h5>1. Exact Button from favorites.php:</h5>
+                <button class="btn btn-outline-dark btn-sm"
+                        onclick="addToCart(123, 1, null, this, true)">
+                    <i class="fas fa-shopping-cart me-1"></i>Add to Cart
+                </button>
+                
+                <hr>
+                
+                <!-- Simple test button -->
+                <h5>2. Simple Test Button:</h5>
+                <button class="btn btn-primary" onclick="testClick()">
+                    Test Click Event
+                </button>
+                
+                <hr>
+                
+                <!-- Button with console log -->
+                <h5>3. Button with Console Log:</h5>
+                <button class="btn btn-success" onclick="console.log('Button clicked!'); alert('Button works!');">
+                    Console Log Test
+                </button>
+                
+                <hr>
+                
+                <!-- Test if addToCart function exists -->
+                <h5>4. Function Existence Test:</h5>
+                <button class="btn btn-warning" onclick="checkAddToCartFunction()">
+                    Check addToCart Function
+                </button>
+            </div>
+        </div>
+        
+        <!-- Results -->
+        <div class="card">
+            <div class="card-header">
+                <h3>Results</h3>
+            </div>
+            <div class="card-body">
+                <div id="results"></div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Load the same scripts as favorites.php -->
+    <script src="assets/js/navbar.js"></script>
+    <script src="assets/js/global-cart.js"></script>
+    <script src="assets/js/global-favorites.js"></script>
+    <script src="assets/js/favorites.js"></script>
+    
+    <script>
+        function testClick() {
+            alert('Simple click test works!');
+            document.getElementById('results').innerHTML += '<div class="alert alert-success">Simple click test: ✅ WORKS</div>';
+        }
+        
+        function checkAddToCartFunction() {
+            const resultsDiv = document.getElementById('results');
+            let html = '<div class="alert alert-info"><h6>Function Check Results:</h6>';
+            
+            // Check if addToCart function exists
+            if (typeof window.addToCart === 'function') {
+                html += '<div>✅ window.addToCart function exists</div>';
+                
+                // Try to call it with test parameters
+                try {
+                    console.log('Testing addToCart function...');
+                    html += '<div>🔄 Attempting to call addToCart(123, 1, null, null, true)...</div>';
+                    
+                    // This will likely fail because we're not logged in, but we can see if the function executes
+                    window.addToCart(123, 1, null, null, true);
+                    html += '<div>✅ Function call completed (check console for details)</div>';
+                } catch (error) {
+                    html += '<div>❌ Error calling function: ' + error.message + '</div>';
+                }
+            } else {
+                html += '<div>❌ window.addToCart function does NOT exist</div>';
+                html += '<div>Available functions on window object:</div>';
+                
+                // List available functions
+                const functions = [];
+                for (let prop in window) {
+                    if (typeof window[prop] === 'function' && prop.includes('Cart')) {
+                        functions.push(prop);
+                    }
+                }
+                html += '<div>Cart-related functions: ' + functions.join(', ') + '</div>';
+            }
+            
+            // Check other required functions
+            const requiredFunctions = [
+                'showNotification',
+                'isUserLoggedIn',
+                'updateCartCountInNavbar',
+                'updateFavoritesCountInNavbar'
+            ];
+            
+            requiredFunctions.forEach(funcName => {
+                if (typeof window[funcName] === 'function') {
+                    html += '<div>✅ ' + funcName + ' exists</div>';
+                } else {
+                    html += '<div>❌ ' + funcName + ' missing</div>';
+                }
+            });
+            
+            html += '</div>';
+            resultsDiv.innerHTML = html;
+        }
+        
+        // Mock functions for testing if they don't exist
+        if (typeof showNotification !== 'function') {
+            window.showNotification = function(message, type) {
+                console.log('NOTIFICATION:', type, message);
+                alert(type.toUpperCase() + ': ' + message);
+            };
+        }
+        
+        if (typeof isUserLoggedIn !== 'function') {
+            window.isUserLoggedIn = function() {
+                console.log('isUserLoggedIn called - returning false (mock)');
+                return false; // Mock - not logged in
+            };
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Page loaded');
+            checkAddToCartFunction();
+        });
+    </script>
+</body>
+</html>
